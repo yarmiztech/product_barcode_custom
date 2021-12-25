@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+            <template id="product.report_simple_barcode">
+            <div style="width: 32%; display: inline-table; height: 10rem;">
+                <table class="table table-bordered mb-0" style="border: 2px solid black;">
+                     <tr>
+                        <th class="table-active text-center" style="height: 4rem;">
+                            <t t-esc="product.company_name()"/>
+                        </th>
+                    </tr>
+                     <tr>
+                        <td class="text-center align-middle" style="height: 6rem;">
+                            <t t-if="product.barcode">
+                                <img alt="Barcode" t-if="len(product.barcode) == 13" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('EAN13', quote_plus(product.barcode or ''), 600, 150)" style="width:100%;height:4rem;"/>
+                                <img alt="Barcode" t-elif="len(product.barcode) == 8" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('EAN8', quote_plus(product.barcode or ''), 600, 150)" style="width:100%;height:4rem;"/>
+                                <img alt="Barcode" t-else="" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', quote_plus(product.barcode or ''), 600, 150)" style="width:100%;height:4rem"/>
+                                <span t-field="product.barcode"/>
+                            </t>
+                            <t t-else=""><span class="text-muted">No barcode available</span></t>
+<!--                        </td>-->
+<!--                    </tr>-->
+<!--                    <tr>-->
+<!--                        <th style="height: 4rem;">-->
+                            <center><span t-field="product.display_name"/></center>
+<!--                            <b>Untaxed Amount : </b><strong t-field="product.list_price"/><br/>-->
+<!--                            <b>Taxed Amount :</b> <t t-esc="product.ar_total_tax()"/><br/>-->
+                            <b><center><t t-esc="product.total_amount_tax()"/></center></b>
+<!--                        </th>-->
+                        </td>
+                    </tr>
+
+                </table>
+            </div>
+        </template>
+
+
+<template id="report_producttemplatebarcode_onhand">
+    <t t-call="web.basic_layout">
+        <div class="page">
+            <t t-foreach="docs" t-as="template">
+            <t t-foreach="int(template.no_of_barcodes)" t-as="qty">
+                <t t-foreach="template.product_variant_ids" t-as="product">
+                    <t t-call="product.report_simple_barcode">
+                        <t t-set="product" t-value="product"/>
+                    </t>
+                </t>
+            </t>
+            </t>
+        </div>
+    </t>
+</template>
+<template id="report_producttemplatebarcode_harizontal">
+    <t t-call="web.basic_layout">
+        <div class="page">
+            <t t-foreach="docs" t-as="template">
+            <t t-foreach="int(template.no_of_barcodes)" t-as="qty">
+                <t t-foreach="template.product_variant_ids" t-as="product">
+                    <t t-call="product.report_simple_barcode">
+                        <t t-set="product" t-value="product"/>
+                    </t>
+                </t>
+                <br/>
+            </t>
+            </t>
+        </div>
+    </t>
+</template>
+     <record id="paperformat_barcode23" model="report.paperformat">
+        <field name="name">A4 Barcode</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">10</field>
+        <field name="margin_bottom">30</field>
+        <field name="margin_left">7</field>
+        <field name="margin_right">7</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">20</field>
+        <field name="dpi">90</field>
+    </record>
+
+
+     <record id="report_template_barcode_onhand" model="ir.actions.report">
+            <field name="name">No Of Product Barcode (PDF)</field>
+            <field name="model">product.template</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">product_barcode_custom.report_producttemplatebarcode_onhand</field>
+            <field name="report_file">product_barcode_custom.report_producttemplatebarcode_onhand</field>
+            <field name="print_report_name">'Products barcode - %s' % (object.name)</field>
+            <field name="binding_model_id" ref="product.model_product_template"/>
+            <field name="binding_type">report</field>
+        </record>
+     <record id="report_template_barcode_harizontal" model="ir.actions.report">
+            <field name="name">No Of Product Barcode (PDF) (H)</field>
+            <field name="model">product.template</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">product_barcode_custom.report_producttemplatebarcode_harizontal</field>
+            <field name="report_file">product_barcode_custom.report_producttemplatebarcode_harizontal</field>
+            <field name="print_report_name">'Products barcode - %s' % (object.name)</field>
+            <field name="binding_model_id" ref="product.model_product_template"/>
+            <field name="binding_type">report</field>
+<!--            <field name="paperformat">paperformat_barcode23</field>-->
+        </record>
+
+
+
+</odoo>
